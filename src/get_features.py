@@ -2,11 +2,14 @@ import numpy as np
 
 
 def labels_to_col_nr(labels_file):
-    labels = {}
+    # why not pandas? fuck pandas.
+    labels_dict = {}
+    labels = []
     with open(labels_file, 'r') as file:
         for row_nr, row_data in enumerate(file):
-            labels[row_data[:-1]] = row_nr  # :-1 to remove \n
-    return labels
+            labels_dict[row_data[:-1]] = row_nr  # :-1 to remove \n
+            labels.append(row_data[:-1])
+    return labels_dict, labels
 
 
 def facing_straight(angles, limit=1):
@@ -19,21 +22,28 @@ def facing_straight(angles, limit=1):
     return True
 
 
-def get_labeled_landmarks(data_row=None, labels=None, face_straight=True, limit=1):
-    x = data_row
-    if x is None:
-        x = np.loadtxt("../data/test_row", delimiter=",", dtype=np.object)
-    if face_straight and not facing_straight(x[236:238], limit):
+def get_labelled_landmarks(data_row, labels_file, face_straight=True, limit_deg=1,
+                           face_id_clean=False):
+    col_nr, labels = labels_to_col_nr(labels_file)
+    if face_straight and not facing_straight(
+            [data_row[col_nr['headpose.yaw_angle']],
+             data_row[col_nr['headpose.pitch_angle']]
+             ],
+            limit_deg):
         return None, None, False
-    face_id = x[1][11:-14]
-    y = [int(o) for o in x[4:-61]]
-    z = np.asarray([(p[1], -p[0]) for p in zip(y[::2], y[1::2])])
-    if labels is None:
-        labels = np.loadtxt("../data/all_labels",
-                            delimiter="\n", dtype=np.str)[4:-61:2]
-    labels = [l[:-2] for l in labels]
-    labeled_data = list(zip(z, labels))
-    return face_id, labeled_data, True
+    face_id = data_row[col_nr['face_id']]
+    if not face_id_clean:
+        face_id = face_id[11:-14]
+    coordinates = [int(o) for o in
+                   data_row[col_nr['contour_chin.y']
+                       :col_nr['right_eye_pupil.x']]
+                   ]
+    points = np.asarray([(p[1], -p[0]) for p in zip(coordinates[::2],
+                                                    coordinates[1::2])])
+    points_labels = [
+        l[:-2] for l in labels[col_nr['contour_chin.y']:col_nr['right_eye_pupil.x']]]
+    labelled_points = list(zip(points, points_labels))
+    return face_id, labelled_points, True
 
 
 def get_features(file, feature_func, labels=None, gender_file=None):
@@ -43,7 +53,7 @@ def get_features(file, feature_func, labels=None, gender_file=None):
     with open(file, 'r') as data_file:
         for row in data_file:
             data = row.split(',')
-            face_id, labeled_data, ok = get_labeled_landmarks(data, labels)
+            face_id, labeled_data, ok = get_labelled_landmarks(data, labels)
             if not ok or (gender_file and face_id not in gender):
                 continue
             roll = np.float(data[238])
