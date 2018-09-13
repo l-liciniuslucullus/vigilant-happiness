@@ -14,18 +14,17 @@ def get_labelled_landmarks(data_row, col_nr, labels, face_straight=True, limit_d
     if not face_id_clean:
         face_id = face_id[11:-14]
     coordinates = [int(o) for o in
-                   data_row[col_nr['contour_chin.y']
-                       :col_nr['right_eye_pupil.x']]
+                   data_row[col_nr['contour_chin.y']:col_nr['right_eye_pupil.x']+1]
                    ]
     points = np.asarray([(p[1], -p[0]) for p in zip(coordinates[::2],
                                                     coordinates[1::2])])
     points_labels = [
-        l[:-2] for l in labels[col_nr['contour_chin.y']:col_nr['right_eye_pupil.x']]]
+        l[:-2] for l in labels[col_nr['contour_chin.y']:col_nr['right_eye_pupil.x']+1:2]]
     labelled_points = list(zip(points, points_labels))
     return face_id, labelled_points, True
 
 
-def get_features(file, feature_func, labels_file, gender_file=None):
+def get_features(file, feature_func, labels_file, gender_file=None, face_id_clean=False, limit_deg=1):
     features = {}
     col_nr, labels = labels_to_col_nr(labels_file)
     if gender_file:
@@ -34,14 +33,17 @@ def get_features(file, feature_func, labels_file, gender_file=None):
         for row in data_file:
             data = row.split(',')
             face_id, labelled_data, ok = get_labelled_landmarks(
-                data, col_nr, labels)
+                data, col_nr, labels, face_id_clean=face_id_clean, limit_deg=limit_deg)
             if not ok or (gender_file and face_id not in gender):
                 continue
-            labelled_data = unroll(labelled_data, np.float(data[col_nr['roll']]))
-            labelled_data = normalize_by_eyes(labelled_data, labelled_data)
+            labelled_data = unroll(
+                labelled_data, np.float(data[col_nr['headpose.roll_angle']]))
+            labelled_data = normalize_by_eyes(labelled_data)
             features[face_id] = feature_func(labelled_data)
             if gender_file:
                 features[face_id].append(gender[face_id])
+            else:
+                features[face_id].append(int(data[col_nr['gender']]))
     return features
 
 
