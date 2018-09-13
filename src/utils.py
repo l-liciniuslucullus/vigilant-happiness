@@ -36,13 +36,13 @@ def normalize(marks, face_width, face_height):
     return [((m[0] - marks[0][0])/face_width, (m[1] - marks[0][1])/face_height)
             for m in marks]
 
-def normalize_by_eyes(marks, labeled_data):
-    eye_left = np.array([m[0][0] for m in labeled_data if 'left_eye_' in m[1]])
+def normalize_by_eyes(marks, labelled_data):
+    eye_left = np.array([m[0][0] for m in labelled_data if 'left_eye_' in m[1]])
     eye_right = np.array([m[0][0]
-                          for m in labeled_data if 'right_eye_' in m[1]])
+                          for m in labelled_data if 'right_eye_' in m[1]])
     dist = np.mean(np.abs(eye_left - eye_right))
     markarray = np.array(marks)
     meanX = np.mean(markarray[:, 0])
-    meanY = np.mean([m[0][1] for m in labeled_data if '_eye_' in m[1]])
+    meanY = np.mean([m[0][1] for m in labelled_data if '_eye_' in m[1]])
     return [((m[0] - meanX)/dist, (m[1] - meanY)/dist)
             for m in marks]

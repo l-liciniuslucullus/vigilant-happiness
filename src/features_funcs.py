@@ -2,7 +2,7 @@ from time import time
 import numpy as np
 from scipy.spatial.distance import cdist, euclidean
 from get_features import get_features
-from average_face import unroll, normalize, normalize_by_eyes
+from utils import unroll, normalize, normalize_by_eyes
 
 
 def fwhr(landmarks):

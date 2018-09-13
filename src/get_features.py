@@ -1,10 +1,9 @@
 import numpy as np
-from utils import labels_to_col_nr, facing_straight
+from utils import labels_to_col_nr, facing_straight, unroll, normalize_by_eyes
 
 
-def get_labelled_landmarks(data_row, labels_file, face_straight=True, limit_deg=1,
+def get_labelled_landmarks(data_row, col_nr, labels, face_straight=True, limit_deg=1,
                            face_id_clean=False):
-    col_nr, labels = labels_to_col_nr(labels_file)
     if face_straight and not facing_straight(
             [data_row[col_nr['headpose.yaw_angle']],
              data_row[col_nr['headpose.pitch_angle']]
@@ -15,7 +14,8 @@ def get_labelled_landmarks(data_row, labels_file, face_straight=True, limit_deg=
     if not face_id_clean:
         face_id = face_id[11:-14]
     coordinates = [int(o) for o in
-                   data_row[col_nr['contour_chin.y']:col_nr['right_eye_pupil.x']]
+                   data_row[col_nr['contour_chin.y']
+                       :col_nr['right_eye_pupil.x']]
                    ]
     points = np.asarray([(p[1], -p[0]) for p in zip(coordinates[::2],
                                                     coordinates[1::2])])
@@ -25,27 +25,22 @@ def get_labelled_landmarks(data_row, labels_file, face_straight=True, limit_deg=
     return face_id, labelled_points, True
 
 
-def get_features(file, feature_func, labels=None, gender_file=None):
+def get_features(file, feature_func, labels_file, gender_file=None):
     features = {}
+    col_nr, labels = labels_to_col_nr(labels_file)
     if gender_file:
         gender = get_gender(gender_file)
     with open(file, 'r') as data_file:
         for row in data_file:
             data = row.split(',')
-            face_id, labeled_data, ok = get_labelled_landmarks(data, labels)
+            face_id, labelled_data, ok = get_labelled_landmarks(
+                data, col_nr, labels)
             if not ok or (gender_file and face_id not in gender):
                 continue
-            roll = np.float(data[238])
-            # face_width = np.float(data[-5])
-            # face_height = np.float(data[-2])
-            # thats a hack it only works for 'normalaize' in feature.funcs.distances.normalized
-            # features[face_id] = feature_func(labeled_data, roll, face_width, face_height)
-            # and thath works only for normalized_by_eyes
-            features[face_id] = feature_func(labeled_data, roll)
-
-            # regular way:
-            # features[face_id] = feature_func(labeled_data)
-
+            marks = [m[0] for m in labelled_data]
+            marks = unroll(marks, np.float(data[col_nr['roll']]))
+            marks = normalize_by_eyes(marks, labelled_data)
+            features[face_id] = feature_func(labelled_data)
             if gender_file:
                 features[face_id].append(gender[face_id])
     return features
