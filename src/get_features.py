@@ -1,25 +1,5 @@
 import numpy as np
-
-
-def labels_to_col_nr(labels_file):
-    # why not pandas? fuck pandas.
-    labels_dict = {}
-    labels = []
-    with open(labels_file, 'r') as file:
-        for row_nr, row_data in enumerate(file):
-            labels_dict[row_data[:-1]] = row_nr  # :-1 to remove \n
-            labels.append(row_data[:-1])
-    return labels_dict, labels
-
-
-def facing_straight(angles, limit=1):
-    try:
-        angles = np.asarray(angles, dtype=np.float)
-    except ValueError:
-        return False
-    if np.any(np.abs(angles) > limit):
-        return False
-    return True
+from utils import labels_to_col_nr, facing_straight
 
 
 def get_labelled_landmarks(data_row, labels_file, face_straight=True, limit_deg=1,
@@ -35,8 +15,7 @@ def get_labelled_landmarks(data_row, labels_file, face_straight=True, limit_deg=
     if not face_id_clean:
         face_id = face_id[11:-14]
     coordinates = [int(o) for o in
-                   data_row[col_nr['contour_chin.y']
-                       :col_nr['right_eye_pupil.x']]
+                   data_row[col_nr['contour_chin.y']:col_nr['right_eye_pupil.x']]
                    ]
     points = np.asarray([(p[1], -p[0]) for p in zip(coordinates[::2],
                                                     coordinates[1::2])])
