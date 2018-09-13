@@ -37,9 +37,8 @@ def get_features(file, feature_func, labels_file, gender_file=None):
                 data, col_nr, labels)
             if not ok or (gender_file and face_id not in gender):
                 continue
-            marks = [m[0] for m in labelled_data]
-            marks = unroll(marks, np.float(data[col_nr['roll']]))
-            marks = normalize_by_eyes(marks, labelled_data)
+            labelled_data = unroll(labelled_data, np.float(data[col_nr['roll']]))
+            labelled_data = normalize_by_eyes(labelled_data, labelled_data)
             features[face_id] = feature_func(labelled_data)
             if gender_file:
                 features[face_id].append(gender[face_id])
@@ -51,7 +50,7 @@ def get_gender(file):
     with open(file, 'r') as f:
         for row in f:
             data = row.split(',')
-            face_id = data[0][1:-1]
+            face_id = data[0][1:-1]  # 1:-1 = remove ""
             gender = int(data[1])
             genders[face_id] = gender
     return genders
