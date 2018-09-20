@@ -23,19 +23,17 @@ def main():
     #        features_funcs.dists_eyebrows,
     #        features_funcs.dists_eyebrows_corners,
     #        features_funcs.dists_eyes]
-    ffs = [features_funcs.distances_normalized_by_eyes]
+    ffs = [features_funcs.fwhr]
 
     for feature_func in ffs:
-        print('get labels', flush=True)
-        t0 = time()
-        labels = np.loadtxt(
-            "../data/labels", delimiter="\n", dtype=np.str)[:: 2]
-        print(time() - t0)
-
         print('get features (with gender)', flush=True)
         t0 = time()
-        features = get_features('../data/temp.csv', feature_func,
-                                labels, '../data/gender.csv')
+        # features = get_features("../data/data.csv", feature_func,
+        #                         "../data/data_labels.txt",
+        #                         "../data/gender.csv", face_id_clean=False, limit_deg=1)
+        features = get_features("../data/testdata.csv", feature_func,
+                                "../data/testdata_labels.txt",
+                                None, face_id_clean=True, limit_deg=180)
         print(time() - t0)
 
         feature_length = 0
@@ -48,7 +46,7 @@ def main():
         arr = np.zeros((len(features), feature_length))
         for row, v in enumerate(features.values()):
             arr[row] = v
-        np.save(feature_func.__name__+'_gender', arr)
+        np.save(feature_func.__name__+'_gender_test_altfwhr', arr)
         print(time() - t0)
 
 

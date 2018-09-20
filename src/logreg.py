@@ -1,6 +1,6 @@
 from time import time
 import numpy as np
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegressionCV, LogisticRegression
 from sklearn.metrics import roc_auc_score
 from sklearn.decomposition import PCA, KernelPCA
 # from sklearn.linear_model import Perceptron
@@ -40,7 +40,7 @@ def logreg(X, y):
     LR = LogisticRegressionCV(cv=10, Cs=10, n_jobs=7)
     LR.fit(X, y)
     y_pred = LR.predict(X)
-
+    np.savetxt('predictions', y_pred)
     sc = roc_auc_score(y, y_pred)
     print('time: ', time() - t0)
     print(
@@ -60,12 +60,15 @@ def reduce_dim(X):
 
 
 def main():
-    logreg(*get_data('../data/fwhr_gender.npy'))
+    # logreg(*get_data('../data/fwhr_gender.npy'))
+    # logreg(*get_data('../data/fwhr_gender_test.npy'))
+    logreg(*get_data('../data/fwhr_gender_test_michal.npy'))
+    logreg(*get_data('../data/fwhr_gender_test_altfwhr.npy'))
     # logreg(*get_data('../data/lips_whr_gender.npy'))
     # logreg(*get_data('../data/random_gender.npy'))
     # logreg(*get_data('../data/face_triangle_to_circumcircle_ratio_gender.npy'))
 
-    logreg(*get_data('../data/distances_gender.npy'))
+    # logreg(*get_data('../data/distances_gender.npy'))
     # logreg(*get_data('../data/hand_picked_dists_gender.npy'))
     # logreg(*get_data('../data/dists_from_2_refs_gender.npy'))
 
@@ -92,8 +95,8 @@ def main():
     # for f in ffs:
     #     logreg(*get_data('../data/'+f+'_gender.npy'))
 
-    logreg(*get_data('distances_normalized_gender.npy'))
-    logreg(*get_data('distances_normalized_by_eyes_gender.npy'))
+    # logreg(*get_data('distances_normalized_gender.npy'))
+    # logreg(*get_data('distances_normalized_by_eyes_gender.npy'))
 
 
 if __name__ == '__main__':

@@ -1,6 +1,7 @@
 from time import time
 import numpy as np
 from scipy.spatial.distance import cdist, euclidean
+from numpy.linalg import norm
 from get_features import get_features
 from utils import unroll, normalize, normalize_by_eyes
 
@@ -21,7 +22,29 @@ def fwhr(landmarks):
     )
     denum = ((y2-y1)**2+(x2-x1)**2)**0.5
     face_height = num / denum
-    return [face_width / face_height]
+
+    p1, p2 = np.array(sides[0]), np.array(sides[1])
+    p3 = np.array([m[0]
+                   for m in landmarks if m[1] == 'mouth_upper_lip_top'][0])
+    d = norm(np.cross(p2-p1, p1-p3))/norm(p2-p1)
+
+    print(face_width/face_height, face_width/d)
+
+    x1, y1 = p1
+    x2, y2 = p2
+    x0, y0 = p3
+    num = abs(
+        (y2-y1)*x0-(x2-x1)*y0+x2*y1-y2*x1
+    )
+    denum = ((y2-y1)**2+(x2-x1)**2)**0.5
+    face_height = num / denum
+    face_width = euclidean(p1, p2)
+
+    print(face_width/face_height, face_width/d)
+    exit(1)
+    # [face_width / face_height]
+
+    return [d]
 
 
 def face_triangle_area(landmarks):
