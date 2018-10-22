@@ -7,6 +7,7 @@ from utils import unroll, normalize, normalize_by_eyes
 
 
 def fwhr(landmarks):
+    '''something wrong with this apparently'''
     sides = [m[0] for m in landmarks if m[1] ==
              'contour_left3' or m[1] == 'contour_right3']
     face_width = euclidean(sides[0], sides[1])
@@ -45,6 +46,10 @@ def fwhr(landmarks):
     # [face_width / face_height]
 
     return [d]
+
+
+def face_contour(landmarks):
+    return [m[0] for m in landmarks if 'contour_' in m[1]]
 
 
 def face_triangle_area(landmarks):
