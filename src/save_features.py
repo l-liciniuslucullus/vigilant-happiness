@@ -23,9 +23,11 @@ def main():
     #        features_funcs.dists_eyebrows,
     #        features_funcs.dists_eyebrows_corners,
     #        features_funcs.dists_eyes]
-    ffs = [features_funcs.butterfly_catastrophe]
+    ffs = [features_funcs.butterfly_catastrophe, features_funcs.ellipse_picked,
+           features_funcs.ellipse, features_funcs.polyfit6, features_funcs.butterfly_catastrophe,
+           features_funcs.face_contour]
 
-    test_data = True
+    test_data = False
 
     for feature_func in ffs:
         print('get features (with gender)', flush=True)
