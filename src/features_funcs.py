@@ -4,6 +4,8 @@ from scipy.spatial.distance import cdist, euclidean
 from numpy.linalg import norm
 from get_features import get_features
 from utils import unroll, normalize, normalize_by_eyes
+import ellipses as el
+from scipy.optimize import curve_fit as cf
 
 
 def fwhr(landmarks):
@@ -49,7 +51,65 @@ def fwhr(landmarks):
 
 
 def face_contour(landmarks):
-    return [m[0] for m in landmarks if 'contour_' in m[1]]
+    return list(np.array([m[0] for m in landmarks if 'contour_' in m[1]]).flatten())
+
+
+def ellipse(landmarks):
+    face = np.array([m[0] for m in landmarks if 'contour_' in m[1]])
+    data = [face[:, 0], face[:, 1]]
+    lsqe = el.LSqEllipse()
+    lsqe.fit(data)
+    center, width, height, phi = lsqe.parameters()
+    return [center[0], center[1], width, height, phi]
+
+
+def ellipse_picked(landmarks):
+    x, y, w, h, phi = ellipse(landmarks)
+    return [y, w, h]
+
+
+def eccentricity(landmarks):
+    x, y, w, h, phi = ellipse(landmarks)
+    # assume width is major axis
+    if w < h:
+        w, h = h, w
+    return [np.sqrt(1 - (h / w)**2)]
+
+
+def rectum(landmarks):
+    x, y, w, h, phi = ellipse(landmarks)
+    # assume width is major axis
+    if w < h:
+        w, h = h, w
+    return [h**2/w]
+
+
+def _x6(x, a, b, c, d, e, f, g):
+    return a*x**6 + b*x**5 + c*x**4 + d*x**3 + e*x**2 + f*x + g
+
+
+def _butterfly(x, a, b, c, d, z):
+    return x**6 + a*x**4 + b*x**3 + c*x**2 + d*x + z
+
+
+def butterfly_catastrophe(landmarks):
+    a = np.array([m[0] for m in landmarks if 'contour_' in m[1]])
+    a = a[a[:, 0].argsort()]
+    x = a[:, 0]
+    y = a[:, 1]
+    cutoff = 7
+    popt, pcov = cf(_butterfly, x[cutoff:-cutoff], y[cutoff:-cutoff])
+    return list(popt)
+
+
+def polyfit6(landmarks):
+    a = np.array([m[0] for m in landmarks if 'contour_' in m[1]])
+    a = a[a[:, 0].argsort()]
+    x = a[:, 0]
+    y = a[:, 1]
+    cutoff = 7
+    popt, pcov = cf(_x6, x[cutoff:-cutoff], y[cutoff:-cutoff])
+    return list(popt)
 
 
 def face_triangle_area(landmarks):
@@ -73,7 +133,7 @@ def face_triangle_area(landmarks):
 
 
 def pure_landmarks(landmarks):
-    return [c for m in landmarks for c in m[0]]
+    return [np.array(c for m in landmarks for c in m[0]).flatten()]
 
 
 def hand_picked_points(landmarks):

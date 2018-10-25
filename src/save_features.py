@@ -23,9 +23,9 @@ def main():
     #        features_funcs.dists_eyebrows,
     #        features_funcs.dists_eyebrows_corners,
     #        features_funcs.dists_eyes]
-    ffs = [features_funcs.fwhr]
+    ffs = [features_funcs.butterfly_catastrophe]
 
-    test_data = False
+    test_data = True
 
     for feature_func in ffs:
         print('get features (with gender)', flush=True)
@@ -51,9 +51,9 @@ def main():
         for row, v in enumerate(features.values()):
             arr[row] = v
         if test_data:
-            np.save(feature_func.__name__+'test', arr)
+            np.save('../data/'+feature_func.__name__+'_test', arr)
         else:
-            np.save(feature_func.__name__, arr)
+            np.save('../data/'+feature_func.__name__, arr)
         print(time() - t0)
 
 
