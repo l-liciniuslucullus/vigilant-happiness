@@ -62,20 +62,15 @@ def reduce_dim(X, n_dim=5):
 def main():
     # logreg(*get_data('../data/fwhr_gender.npy'))
     # logreg(*get_data('../data/fwhr_gender_test.npy'))
+    
+    
     logreg(*get_data('../data/fwhr_gender_test_michal.npy'))
     logreg(*get_data('../data/ellipse_picked_test.npy'))
-    # logreg(*get_data('../data/fwhr_gender_test_altfwhr.npy'))
     X, y = get_data('../data/ellipsetest.npy')
-    # l = ['center_x', 'center_y', 'width', 'height', 'phi']
-    # for ii in range(5):
-    #     print(l[ii])
-    #     logreg(X[:, ii].reshape(-1, 1), y)
     logreg(X, y)
-    # logreg(X, y)
     logreg(reduce_dim(X, 2), y)
     print('only y coord of the ellipse')
     logreg(X[:, 1].reshape(-1, 1), y)
-
     X, y = get_data('../data/polyfit6_test.npy')
     logreg(X, y)
     logreg(reduce_dim(X, 5), y)
@@ -83,11 +78,20 @@ def main():
     X, y = get_data('../data/butterfly_catastrophe_test.npy')
     logreg(X, y)
     logreg(reduce_dim(X, 3), y)
+    logreg(*get_data('../data/face_contour_test.npy'))
+    
+    
+    # logreg(*get_data('../data/fwhr_gender_test_altfwhr.npy'))
+    # l = ['center_x', 'center_y', 'width', 'height', 'phi']
+    # for ii in range(5):
+    #     print(l[ii])
+    #     logreg(X[:, ii].reshape(-1, 1), y)
+    # logreg(X, y)
+
 
     # logreg(*get_data('../data/eccentricity_test.npy'))
     # logreg(*get_data('../data/rectum_test.npy'))
     # logreg(*get_data('../data/dists_contour_test.npy'))
-    logreg(*get_data('../data/face_contour_test.npy'))
     # logreg(*get_data('../data/dists_2_refs_contour_test.npy'))
     # logreg(*get_data('../data/lips_whr_gender.npy'))
     # logreg(*get_data('../data/random_gender.npy'))
